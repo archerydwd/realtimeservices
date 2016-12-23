@@ -152,20 +152,22 @@ def build_response(session_attributes, speechlet_response):
 # --------------- Functions that control the skill's behavior ------------------
 
 def get_welcome_response():
-    """ If we wanted to initialize the session to have some attributes we could
-    add those here
-    """
     session_attributes = {}
     card_title = "train"
-    speech_output = "Please tell me your nearest Irish train station"
-    reprompt_text = "Sorry, I did not get that. Please tell me your nearest train station"
+    speech_output = "Please tell me your nearest station"
+    reprompt_text = "Sorry, I did not get that. Please tell me your nearest station"
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
+def handle_session_help_request(intent, session):
+    speech_output = "I can tell you what the next train will be, in a train station of your choosing. For example, you can ask me about the next train, by saying: when will the next train be at Dublin Heuston?"
+    return build_response({}, build_speechlet_response(
+        intent['name'], speech_output, None, False))
+
 def handle_session_end_request():
     card_title = "Session Ended"
-    speech_output = "Thanks for using Real Time Services."
+    speech_output = "Goodbye."
     should_end_session = True
     return build_response({}, build_speechlet_response(
         card_title, speech_output, None, should_end_session))
@@ -197,13 +199,13 @@ def set_train_station_session(intent, session):
             sorted_trains = sorted(train_list, key=lambda k: k['scheduled_arrival'])
             number_of_trains = len(sorted_trains)
             if number_of_trains > 1:
-                speech_output = "The next train is in " + sorted_trains[0]['due_in'] + " minutes, it will arrive at: " + sorted_trains[0]['eta'] + " traveling towards " + sorted_trains[0]['destination'] + " and the following train is in " + sorted_trains[1]['due_in'] + " minutes, it will arrive at: " + sorted_trains[1]['eta'] + " traveling towards " + sorted_trains[1]['destination']
+                speech_output = "The next train is in " + sorted_trains[0]['due_in'] + " minutes, traveling towards " + sorted_trains[0]['destination'] + " and the following train is in " + sorted_trains[1]['due_in'] + " minutes, traveling towards " + sorted_trains[1]['destination']
             elif number_of_trains == 1:
-                speech_output = "The next train is in " + sorted_trains[0]['due_in'] + " minutes, it will arrive at: " + sorted_trains[0]['eta'] + " traveling towards " + sorted_trains[0]['destination']
-            else:
-                speech_output = "There are currently no trains running to that station"
+                speech_output = "The next train is in " + sorted_trains[0]['due_in'] + " minutes, traveling towards " + sorted_trains[0]['destination']
+        else:
+            speech_output = "There are currently no trains running to " + intent['slots']['Station']['value'] + " station"
         should_end_session = True
-        reprompt_text = "There are currently no trains running to that station"
+        reprompt_text = None
     else:
         speech_output = "I'm not sure what your station is. " \
                         "Please try again."
@@ -217,39 +219,35 @@ def set_train_station_session(intent, session):
 # --------------- Events ------------------
 
 def on_session_started(session_started_request, session):
-    """ Called when the session starts """
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
 def on_launch(launch_request, session):
-    """ Called when the user launches the skill without specifying what they want """
     print("on_launch requestId=" + launch_request['requestId'] +
           ", sessionId=" + session['sessionId'])
     return get_welcome_response()
 
 def on_intent(intent_request, session):
-    """ Called when the user specifies an intent for this skill """
     print("on_intent requestId=" + intent_request['requestId'] +
           ", sessionId=" + session['sessionId'])
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
     if intent_name == "GetTrain":
         return set_train_station_session(intent, session)
+    elif intent_name == "AMAZON.StopIntent":
+        return handle_session_end_request()
+    elif intent_name == "AMAZON.HelpIntent":
+        return handle_session_help_request(intent, session)
     else:
         raise ValueError("Invalid intent")
 
 def on_session_ended(session_ended_request, session):
-    """ Called when the user ends the session.
-    Is not called when the skill returns should_end_session=true """
     print("on_session_ended requestId=" + session_ended_request['requestId'] +
           ", sessionId=" + session['sessionId'])
 
 # --------------- Main handler ------------------
 
 def lambda_handler(event, context):
-    """ Route the incoming request based on type (LaunchRequest, IntentRequest,
-    etc.) The JSON body of the request is provided in the event parameter.
-    """
     print("event.session.application.applicationId=" +
           event['session']['application']['applicationId'])
 
