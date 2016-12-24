@@ -130,8 +130,8 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         },
         'card': {
             'type': 'Simple',
-            'title': "SessionSpeechlet - " + title,
-            'content': "SessionSpeechlet - " + output
+            'title': title,
+            'content': output
         },
         'reprompt': {
             'outputSpeech': {
@@ -235,6 +235,8 @@ def on_intent(intent_request, session):
     if intent_name == "GetTrain":
         return set_train_station_session(intent, session)
     elif intent_name == "AMAZON.StopIntent":
+        return handle_session_end_request()
+    elif intent_name == "AMAZON.CancelIntent":
         return handle_session_end_request()
     elif intent_name == "AMAZON.HelpIntent":
         return handle_session_help_request(intent, session)
