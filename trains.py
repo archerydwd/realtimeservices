@@ -153,7 +153,7 @@ def build_response(session_attributes, speechlet_response):
 
 def get_welcome_response():
     session_attributes = {}
-    card_title = "train"
+    card_title = "Train"
     speech_output = "Please tell me your nearest station"
     reprompt_text = "Sorry, I did not get that. Please tell me your nearest station"
     should_end_session = False
@@ -163,7 +163,7 @@ def get_welcome_response():
 def handle_session_help_request(intent, session):
     speech_output = "I can tell you what the next train will be, in a train station of your choosing. For example, you can ask me about the next train, by saying: when will the next train be at Dublin Heuston?"
     return build_response({}, build_speechlet_response(
-        intent['name'], speech_output, None, False))
+        "Help feedback", speech_output, None, False))
 
 def handle_session_end_request():
     card_title = "Session Ended"
@@ -184,7 +184,7 @@ def build_trains(train):
     return t
 
 def set_train_station_session(intent, session):
-    card_title = intent['name']
+    card_title = "Station Info"
     session_attributes = {}
     if 'Station' in intent['slots'] and intent['slots']['Station']['value'].lower() in stations.keys():
         session_attributes = set_train_station(intent['slots']['Station']['value'].lower())
@@ -207,6 +207,7 @@ def set_train_station_session(intent, session):
         should_end_session = True
         reprompt_text = None
     else:
+        card_title = "Repeat request"
         speech_output = "I'm not sure what your station is. " \
                         "Please try again."
         reprompt_text = "I'm not sure what your station is. " \
