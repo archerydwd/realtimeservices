@@ -200,11 +200,11 @@ def set_train_station_session(intent, session):
             sorted_trains = sorted(train_list, key=lambda k: k['scheduled_arrival'])
             number_of_trains = len(sorted_trains)
             if number_of_trains > 1:
-                speech_output = "The next train is " + sorted_trains[0]['late'] + " minutes late, it is due in " + sorted_trains[0]['due_in'] + " minutes, traveling towards " + sorted_trains[0]['destination'] + " and the following train is " + sorted_trains[1]['late'] + " minutes late, it is due in " + sorted_trains[1]['due_in'] + " minutes, traveling towards " + sorted_trains[1]['destination']
+                speech_output = session_attributes['Station'] + ". The next train is " + sorted_trains[0]['late'] + " minutes late, it is due in " + sorted_trains[0]['due_in'] + " minutes, traveling towards " + sorted_trains[0]['destination'] + " and the following train is " + sorted_trains[1]['late'] + " minutes late, it is due in " + sorted_trains[1]['due_in'] + " minutes, traveling towards " + sorted_trains[1]['destination']
             elif number_of_trains == 1:
-                speech_output = "The next train is " + sorted_trains[0]['late'] + " minutes late, it is due in " + sorted_trains[0]['due_in'] + " minutes, traveling towards " + sorted_trains[0]['destination']
+                speech_output = session_attributes['Station'] + ". The next train is " + sorted_trains[0]['late'] + " minutes late, it is due in " + sorted_trains[0]['due_in'] + " minutes, traveling towards " + sorted_trains[0]['destination']
         else:
-            speech_output = "There are currently no trains running to " + intent['slots']['Station']['value'] + " station"
+            speech_output = session_attributes['Station'] + ". There are currently no trains running to " + intent['slots']['Station']['value'] + " station"
         should_end_session = True
         reprompt_text = None
     else:
